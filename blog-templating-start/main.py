@@ -1,22 +1,14 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 import requests
+
+posts = requests.get("https://api.npoint.io/43644ec4f0013682fc0d").json()
+
 app = Flask(__name__)
 
-data_endpoint = 'https://api.npoint.io/37619b6eae6b6872de99'
-response = requests.get(data_endpoint)
-posts = response.json()
-
 @app.route('/')
-def home():
-    return render_template('index.html', posts=posts)
+def get_all_posts():
+    return render_template("index.html", all_posts=posts)
 
-@app.route('/about')
-def about():
-    return render_template('about.html')
-
-@app.route('/contact')
-def contact():
-    return render_template('contact.html')
 
 @app.route("/post/<int:index>")
 def show_post(index):
@@ -26,5 +18,23 @@ def show_post(index):
             requested_post = blog_post
     return render_template("post.html", post=requested_post)
 
-if __name__ == ('__main__'):
+
+@app.route("/about")
+def about():
+    return render_template("about.html")
+
+
+@app.route("/contact", methods=["GET", "POST"])
+def contact():
+    if request.method == "POST":
+        data = request.form
+        print(data["name"])
+        print(data["email"])
+        print(data["phone"])
+        print(data["message"])
+        return "<h1>Successfully sent your message</h1>"
+    return render_template("contact.html")
+
+
+if __name__ == "__main__":
     app.run(debug=True)
